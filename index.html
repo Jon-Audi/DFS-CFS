@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFS - Chain Link Fence System</title>
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+    <!-- Page Navigation Tabs -->
+    <div id="page-nav">
+        <div class="nav-brand">CFS</div>
+        <button class="nav-tab active" data-page="draw" onclick="App.showPage('draw')">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25z" fill="currentColor"/></svg>
+            QwikDraw
+        </button>
+        <button class="nav-tab" data-page="estimator" onclick="App.showPage('estimator')">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="currentColor"/></svg>
+            Estimator
+        </button>
+        <button class="nav-tab" data-page="shopdraw" onclick="App.showPage('shopdraw'); ShopDrawing.showDialog();">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/></svg>
+            Shop Drawings
+        </button>
+    </div>
+
+    <!-- ==================== DRAW PAGE ==================== -->
+    <div id="page-draw" class="app-page active">
+    <!-- Top Toolbar -->
+    <div id="toolbar">
+        <div class="toolbar-group">
+            <button class="tool-btn active" data-tool="select" title="Select / Move (V)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z" fill="currentColor"/></svg>
+                <span>Select</span>
+            </button>
+            <button class="tool-btn" data-tool="post" title="Place Post (P)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="12" cy="12" r="6" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+                <span>Post</span>
+            </button>
+            <button class="tool-btn" data-tool="rail" title="Draw Rail (R)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="3"/></svg>
+                <span>Rail</span>
+            </button>
+            <button class="tool-btn" data-tool="gate" title="Place Gate (G)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><rect x="3" y="6" width="18" height="12" rx="1" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 12h8M15 8v8" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span>Gate</span>
+            </button>
+            <button class="tool-btn" data-tool="fencerun" title="Fence Run (F)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><circle cx="4" cy="12" r="2" fill="currentColor"/><line x1="6" y1="12" x2="18" y2="12" stroke="currentColor" stroke-width="2"/><circle cx="20" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+                <span>Fence Run</span>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="tool-btn" data-tool="measure" title="Measure (M)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2"/><line x1="3" y1="15" x2="3" y2="21" stroke="currentColor" stroke-width="2"/><line x1="21" y1="15" x2="21" y2="21" stroke="currentColor" stroke-width="2"/><text x="12" y="14" text-anchor="middle" fill="currentColor" font-size="8">10'</text></svg>
+                <span>Measure</span>
+            </button>
+            <button class="tool-btn" data-tool="label" title="Add Label (L)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><text x="12" y="17" text-anchor="middle" fill="currentColor" font-size="16" font-weight="bold">A</text></svg>
+                <span>Label</span>
+            </button>
+            <button class="tool-btn" data-tool="freehand" title="Freehand Draw (D)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 17c3-4 6 2 9-2s6 2 9-2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <span>Freehand</span>
+            </button>
+            <button class="tool-btn" data-tool="eraser" title="Eraser (E)">
+                <svg viewBox="0 0 24 24" width="20" height="20"><rect x="5" y="10" width="14" height="8" rx="2" fill="none" stroke="currentColor" stroke-width="2" transform="rotate(-20 12 14)"/><line x1="9" y1="20" x2="19" y2="20" stroke="currentColor" stroke-width="2"/></svg>
+                <span>Eraser</span>
+            </button>
+        </div>
+        <div class="toolbar-group">
+            <div class="toolbar-divider"></div>
+            <button class="action-btn" id="btn-undo" title="Undo (Ctrl+Z)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M12.5 8c-2.65 0-5.05 1.04-6.83 2.73L2 7v9h9l-3.62-3.62A8.96 8.96 0 0112.5 10c3.86 0 7.14 2.43 8.38 5.85L23 15a11 11 0 00-10.5-7z" fill="currentColor"/></svg>
+            </button>
+            <button class="action-btn" id="btn-redo" title="Redo (Ctrl+Y)">
+                <svg viewBox="0 0 24 24" width="18" height="18"><path d="M18.4 10.6C16.55 9 14.15 8 11.5 8a11 11 0 00-10.5 7l2.12.85A8.96 8.96 0 0111.5 10c2.13 0 4.1.74 5.62 1.98L13.5 16H22V7l-3.6 3.6z" fill="currentColor"/></svg>
+            </button>
+            <div class="toolbar-divider"></div>
+            <button class="action-btn" id="btn-zoom-fit" title="Zoom to Fit">Fit</button>
+            <button class="action-btn" id="btn-zoom-100" title="Reset Zoom">100%</button>
+            <div class="toolbar-divider"></div>
+            <button class="action-btn" id="btn-save" title="Save (Ctrl+S)">Save</button>
+            <button class="action-btn" id="btn-load" title="Open (Ctrl+O)">Open</button>
+            <button class="action-btn" id="btn-export" title="Export PNG">Export</button>
+            <button class="action-btn" id="btn-print" title="Shop Drawing (Ctrl+P)">Print</button>
+        </div>
+        <div class="toolbar-group toolbar-info">
+            <label>Job: <input type="text" id="job-name" placeholder="Job Name" class="toolbar-input"></label>
+            <label>Job #: <input type="text" id="job-number" placeholder="1000" class="toolbar-input toolbar-input-sm"></label>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div id="main">
+        <!-- Left Sidebar: Component Library + Properties -->
+        <div id="sidebar">
+            <div id="component-library">
+                <h3>Components</h3>
+                <div id="component-categories">
+                    <!-- Populated by components.js -->
+                </div>
+            </div>
+            <div id="properties-panel">
+                <h3>Properties</h3>
+                <div id="properties-content">
+                    <p class="placeholder-text">Select an element to view properties</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Canvas Area -->
+        <div id="canvas-container">
+            <canvas id="draw-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div id="statusbar">
+        <span id="status-coords">X: 0" Y: 0"</span>
+        <span id="status-grid">Grid: 6"</span>
+        <span id="status-zoom">Zoom: 100%</span>
+        <span id="status-snap">Snap: ON</span>
+        <span id="status-elements">Elements: 0</span>
+        <span id="status-tool">Tool: Select</span>
+    </div>
+
+    <!-- Post Type Selector (shown when post tool active) -->
+    <div id="post-options" class="tool-options" style="display:none;">
+        <label>Type:
+            <select id="post-type">
+                <option value="end">End Post</option>
+                <option value="corner">Corner Post</option>
+                <option value="line">Line Post</option>
+                <option value="gate">Gate Post</option>
+            </select>
+        </label>
+        <label>Size:
+            <select id="post-size">
+                <option value="1.625">1-5/8"</option>
+                <option value="2.375" selected>2-3/8"</option>
+                <option value="2.875">2-7/8"</option>
+                <option value="4">4"</option>
+                <option value="6.625">6-5/8"</option>
+            </select>
+        </label>
+    </div>
+
+    <!-- Rail Options -->
+    <div id="rail-options" class="tool-options" style="display:none;">
+        <label>Type:
+            <select id="rail-type">
+                <option value="top">Top Rail</option>
+                <option value="bottom">Bottom Rail</option>
+                <option value="mid">Mid Rail</option>
+            </select>
+        </label>
+        <label>Size:
+            <select id="rail-size">
+                <option value="1.375">1-3/8"</option>
+                <option value="1.625" selected>1-5/8"</option>
+                <option value="2">2"</option>
+            </select>
+        </label>
+    </div>
+
+    <!-- Gate Options -->
+    <div id="gate-options" class="tool-options" style="display:none;">
+        <label>Type:
+            <select id="gate-type">
+                <option value="swing">Swing Gate</option>
+                <option value="double-swing">Double Swing</option>
+                <option value="slide">Slide Gate</option>
+                <option value="cantilever">Cantilever Gate</option>
+            </select>
+        </label>
+        <label>Width:
+            <select id="gate-width">
+                <option value="36">3'</option>
+                <option value="48" selected>4'</option>
+                <option value="60">5'</option>
+                <option value="72">6'</option>
+                <option value="96">8'</option>
+                <option value="120">10'</option>
+                <option value="144">12'</option>
+                <option value="240">20'</option>
+            </select>
+        </label>
+        <label>Frame:
+            <select id="gate-frame-size">
+                <option value="1.375">1-3/8"</option>
+                <option value="1.625" selected>1-5/8"</option>
+                <option value="1.875">1-7/8"</option>
+                <option value="2">2"</option>
+                <option value="2.375">2-3/8"</option>
+            </select>
+        </label>
+        <label>Swing:
+            <select id="gate-swing">
+                <option value="in">Inward</option>
+                <option value="out">Outward</option>
+            </select>
+        </label>
+        <label>Hinge:
+            <select id="gate-hinge-side">
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+            </select>
+        </label>
+        <label><input type="checkbox" id="gate-braced" checked> Braced</label>
+    </div>
+
+    <!-- Fence Run Options -->
+    <div id="fencerun-options" class="tool-options" style="display:none;">
+        <label>Post Spacing:
+            <select id="fencerun-spacing">
+                <option value="72">6'</option>
+                <option value="96">8'</option>
+                <option value="120" selected>10'</option>
+                <option value="144">12'</option>
+            </select>
+        </label>
+        <label>Height:
+            <select id="fence-height">
+                <option value="36">3'</option>
+                <option value="42">3.5'</option>
+                <option value="48" selected>4'</option>
+                <option value="60">5'</option>
+                <option value="72">6'</option>
+                <option value="96">8'</option>
+            </select>
+        </label>
+        <label>Rails:
+            <select id="fence-rails">
+                <option value="1">1 Rail</option>
+                <option value="2" selected>2 Rails</option>
+                <option value="3">3 Rails</option>
+            </select>
+        </label>
+        <label>Material:
+            <select id="fence-material">
+                <option value="chainlink" selected>Chainlink</option>
+                <option value="pvc">PVC / Vinyl</option>
+                <option value="wood">Wood</option>
+                <option value="ornamental">Ornamental</option>
+                <option value="weldedpanel">Welded Panel</option>
+            </select>
+        </label>
+    </div>
+
+    <!-- Label Input Dialog -->
+    <div id="label-dialog" class="dialog-overlay" style="display:none;">
+        <div class="dialog">
+            <h3>Add Label</h3>
+            <input type="text" id="label-text" placeholder="Enter label text..." autofocus>
+            <div class="dialog-buttons">
+                <button id="label-ok" class="btn-primary">OK</button>
+                <button id="label-cancel" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Shop Drawing Dialog -->
+    <div id="shop-drawing-dialog" class="dialog-overlay" style="display:none;">
+        <div class="dialog dialog-lg">
+            <h3>Shop Drawing Setup</h3>
+            <div class="dialog-form">
+                <label>Drawing Type:
+                    <select id="sd-drawing-type" class="dialog-input" onchange="ShopDrawing.onTypeChange()">
+                        <optgroup label="Chain Link">
+                            <option value="chainlink-fence">Standard Chain Link Fence Section</option>
+                            <option value="swing-gate">Chain Link Swing Gate</option>
+                            <option value="double-swing-gate">Chain Link Double Swing Gate</option>
+                            <option value="cantilever-gate">Cantilever Slide Gate</option>
+                            <option value="slide-gate">Roller Slide Gate</option>
+                        </optgroup>
+                        <optgroup label="Wood">
+                            <option value="wood-fence">Wood Fence Section</option>
+                        </optgroup>
+                        <optgroup label="Vinyl / PVC">
+                            <option value="vinyl-fence">Vinyl / PVC Fence Section</option>
+                        </optgroup>
+                        <optgroup label="Ornamental">
+                            <option value="ornamental-fence">Ornamental Iron / Aluminum Section</option>
+                        </optgroup>
+                        <optgroup label="Wire Panel">
+                            <option value="wirepanel-fence">Welded Wire Panel Section</option>
+                        </optgroup>
+                        <optgroup label="Other">
+                            <option value="canvas-drawing">Current Canvas Drawing</option>
+                        </optgroup>
+                    </select>
+                </label>
+                <hr style="border-color:var(--border);margin:4px 0;">
+                <label>Fence Height:
+                    <select id="sd-fence-height" class="dialog-input">
+                        <option value="36">3'</option>
+                        <option value="42">3'-6"</option>
+                        <option value="48" selected>4'</option>
+                        <option value="60">5'</option>
+                        <option value="72">6'</option>
+                        <option value="96">8'</option>
+                        <option value="120">10'</option>
+                        <option value="144">12'</option>
+                    </select>
+                </label>
+
+                <!-- Chain Link Gate Options -->
+                <div id="sd-gate-opts">
+                    <label>Gate Opening:
+                        <select id="sd-gate-width" class="dialog-input">
+                            <option value="36">3'</option>
+                            <option value="48">4'</option>
+                            <option value="60">5'</option>
+                            <option value="72">6'</option>
+                            <option value="96">8'</option>
+                            <option value="120">10'</option>
+                            <option value="144">12'</option>
+                            <option value="168">14'</option>
+                            <option value="192">16'</option>
+                            <option value="240">20'</option>
+                            <option value="288">24'</option>
+                            <option value="360">30'</option>
+                        </select>
+                    </label>
+                </div>
+
+                <!-- Chain Link Specific Options -->
+                <div id="sd-chainlink-opts">
+                    <label>Post O.D.:
+                        <select id="sd-post-od" class="dialog-input">
+                            <option value="1.625">1-5/8" (Res Line)</option>
+                            <option value="2.375" selected>2-3/8" (Std Terminal)</option>
+                            <option value="2.875">2-7/8" (Hvy Terminal)</option>
+                            <option value="4">4" (Ind Gate)</option>
+                            <option value="6.625">6-5/8" (Hvy Gate)</option>
+                        </select>
+                    </label>
+                    <label>Top Rail O.D.:
+                        <select id="sd-rail-od" class="dialog-input">
+                            <option value="1.375">1-3/8"</option>
+                            <option value="1.625" selected>1-5/8"</option>
+                            <option value="1.875">1-7/8"</option>
+                        </select>
+                    </label>
+                    <label>Fabric:
+                        <select id="sd-fabric" class="dialog-input">
+                            <option value="9ga-2">9 Ga. / 2" Mesh</option>
+                            <option value="11ga-2">11 Ga. / 2" Mesh</option>
+                            <option value="11.5ga-2.25" selected>11-1/2 Ga. / 2-1/4" Mesh</option>
+                            <option value="6ga-2">6 Ga. / 2" Mesh</option>
+                        </select>
+                    </label>
+                    <label>Finish:
+                        <select id="sd-finish" class="dialog-input">
+                            <option value="galvanized" selected>Galvanized</option>
+                            <option value="black-vinyl">Black Vinyl Coated</option>
+                            <option value="green-vinyl">Green Vinyl Coated</option>
+                            <option value="brown-vinyl">Brown Vinyl Coated</option>
+                        </select>
+                    </label>
+                    <label>Selvage:
+                        <select id="sd-selvage" class="dialog-input">
+                            <option value="knuckle-knuckle" selected>Knuckle / Knuckle</option>
+                            <option value="knuckle-barb">Knuckle / Barb</option>
+                            <option value="barb-barb">Barb / Barb</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="sd-braced" checked> Braced &amp; Trussed</label>
+                    <label><input type="checkbox" id="sd-tension-wire"> Top Tension Wire</label>
+                    <label><input type="checkbox" id="sd-barb-wire"> Barbed Wire Arms</label>
+                </div>
+
+                <!-- Wood Fence Options -->
+                <div id="sd-wood-opts" style="display:none;">
+                    <label>Style:
+                        <select id="sd-wood-style" class="dialog-input">
+                            <option value="privacy" selected>Privacy (Board-on-Board)</option>
+                            <option value="stockade">Stockade</option>
+                            <option value="picket">Picket</option>
+                            <option value="shadow-box">Shadow Box</option>
+                            <option value="split-rail">Split Rail</option>
+                        </select>
+                    </label>
+                    <label>Post Size:
+                        <select id="sd-wood-post" class="dialog-input">
+                            <option value="4x4" selected>4x4</option>
+                            <option value="6x6">6x6</option>
+                        </select>
+                    </label>
+                    <label>Rail Size:
+                        <select id="sd-wood-rail" class="dialog-input">
+                            <option value="2x4" selected>2x4</option>
+                            <option value="2x3">2x3</option>
+                        </select>
+                    </label>
+                    <label>Picket Size:
+                        <select id="sd-wood-picket" class="dialog-input">
+                            <option value="1x4">1x4</option>
+                            <option value="1x6" selected>1x6</option>
+                            <option value="dog-ear">Dog Ear 1x6</option>
+                        </select>
+                    </label>
+                    <label>Rails:
+                        <select id="sd-wood-rails" class="dialog-input">
+                            <option value="2" selected>2 Rails</option>
+                            <option value="3">3 Rails</option>
+                        </select>
+                    </label>
+                    <label>Wood Type:
+                        <select id="sd-wood-type" class="dialog-input">
+                            <option value="Pressure Treated" selected>Pressure Treated</option>
+                            <option value="Cedar">Cedar</option>
+                            <option value="Redwood">Redwood</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="sd-wood-postcaps" checked> Post Caps</label>
+                    <label><input type="checkbox" id="sd-wood-kickboard"> Kickboard</label>
+                </div>
+
+                <!-- Vinyl / PVC Options -->
+                <div id="sd-vinyl-opts" style="display:none;">
+                    <label>Style:
+                        <select id="sd-vinyl-style" class="dialog-input">
+                            <option value="privacy" selected>Privacy</option>
+                            <option value="semi-privacy">Semi-Privacy</option>
+                            <option value="picket">Picket</option>
+                            <option value="ranch-rail">Ranch Rail</option>
+                        </select>
+                    </label>
+                    <label>Post Size:
+                        <select id="sd-vinyl-post" class="dialog-input">
+                            <option value="4x4" selected>4x4</option>
+                            <option value="5x5">5x5</option>
+                        </select>
+                    </label>
+                    <label>Color:
+                        <select id="sd-vinyl-color" class="dialog-input">
+                            <option value="White" selected>White</option>
+                            <option value="Tan">Tan / Almond</option>
+                            <option value="Gray">Gray</option>
+                        </select>
+                    </label>
+                    <label>Section Width:
+                        <select id="sd-vinyl-section" class="dialog-input">
+                            <option value="6" selected>6'</option>
+                            <option value="8">8'</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="sd-vinyl-postcaps" checked> Post Caps</label>
+                    <label><input type="checkbox" id="sd-vinyl-alum" checked> Aluminum Inserts</label>
+                </div>
+
+                <!-- Ornamental Options -->
+                <div id="sd-orn-opts" style="display:none;">
+                    <label>Style:
+                        <select id="sd-orn-style" class="dialog-input">
+                            <option value="flat-top" selected>Flat Top</option>
+                            <option value="spear-top">Spear Top / Finial</option>
+                            <option value="puppy-picket">Puppy Picket</option>
+                        </select>
+                    </label>
+                    <label>Material:
+                        <select id="sd-orn-material" class="dialog-input">
+                            <option value="Aluminum" selected>Aluminum</option>
+                            <option value="Steel">Steel / Iron</option>
+                        </select>
+                    </label>
+                    <label>Post Size:
+                        <select id="sd-orn-post" class="dialog-input">
+                            <option value="2x2" selected>2x2</option>
+                            <option value="2.5x2.5">2-1/2 x 2-1/2</option>
+                            <option value="3x3">3x3</option>
+                        </select>
+                    </label>
+                    <label>Post Cap:
+                        <select id="sd-orn-cap" class="dialog-input">
+                            <option value="flat" selected>Flat Cap</option>
+                            <option value="ball">Ball Cap</option>
+                            <option value="finial">Finial Cap</option>
+                        </select>
+                    </label>
+                    <label>Color:
+                        <select id="sd-orn-color" class="dialog-input">
+                            <option value="Black" selected>Black</option>
+                            <option value="Bronze">Bronze</option>
+                            <option value="White">White</option>
+                        </select>
+                    </label>
+                </div>
+
+                <!-- Wire Panel Options -->
+                <div id="sd-wp-opts" style="display:none;">
+                    <label>Panel Type:
+                        <select id="sd-wp-type" class="dialog-input">
+                            <option value="welded-wire" selected>Welded Wire</option>
+                            <option value="cattle-panel">Cattle Panel</option>
+                            <option value="hog-panel">Hog Panel</option>
+                        </select>
+                    </label>
+                    <label>Post Type:
+                        <select id="sd-wp-post" class="dialog-input">
+                            <option value="t-post" selected>T-Post (Steel)</option>
+                            <option value="pipe">Pipe Post</option>
+                            <option value="wood">Wood Post (4x4)</option>
+                        </select>
+                    </label>
+                    <label>Wire Gauge:
+                        <select id="sd-wp-gauge" class="dialog-input">
+                            <option value="10" selected>10 Gauge</option>
+                            <option value="12">12 Gauge</option>
+                            <option value="14">14 Gauge</option>
+                        </select>
+                    </label>
+                    <label><input type="checkbox" id="sd-wp-toprail"> Top Rail (Pipe)</label>
+                    <label><input type="checkbox" id="sd-wp-tension" checked> Tension Wire</label>
+                </div>
+                <hr style="border-color:var(--border);margin:4px 0;">
+                <label>Company Name: <input type="text" id="sd-company" class="dialog-input" placeholder="Your Fence Co."></label>
+                <label>Job Name: <input type="text" id="sd-job-name" class="dialog-input"></label>
+                <label>Job Number: <input type="text" id="sd-job-number" class="dialog-input"></label>
+                <label>Customer: <input type="text" id="sd-customer" class="dialog-input"></label>
+                <label>Address: <input type="text" id="sd-address" class="dialog-input"></label>
+                <label>Estimator: <input type="text" id="sd-estimator" class="dialog-input"></label>
+                <label>Drawing No.: <input type="text" id="sd-drawing-no" class="dialog-input"></label>
+            </div>
+            <div class="dialog-buttons">
+                <button id="sd-print" class="btn-primary">Generate Shop Drawing</button>
+                <button id="sd-cancel" class="btn-secondary">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for loading -->
+    <input type="file" id="file-input" accept=".qdf,.json" style="display:none;">
+
+    </div><!-- end page-draw -->
+
+    <!-- ==================== ESTIMATOR PAGE ==================== -->
+    <div id="page-estimator" class="app-page">
+        <div class="est-layout">
+            <!-- Left: Input Form -->
+            <div class="est-input-panel">
+                <div class="est-section">
+                    <h3>Job Info</h3>
+                    <div class="est-row">
+                        <label>Job Name</label>
+                        <input type="text" id="est-job-name" placeholder="Customer / Project">
+                    </div>
+                    <div class="est-row">
+                        <label>Job #</label>
+                        <input type="text" id="est-job-number" placeholder="1001">
+                    </div>
+                </div>
+
+                <div class="est-section">
+                    <h3>Fence Type</h3>
+                    <div class="est-row">
+                        <label>Type</label>
+                        <select id="est-fence-type" onchange="Estimator.onTypeChange()">
+                            <option value="chainlink" selected>Chain Link</option>
+                            <option value="wood">Wood</option>
+                            <option value="vinyl">PVC / Vinyl</option>
+                            <option value="ornamental">Ornamental Iron / Aluminum</option>
+                            <option value="wirepanel">Welded Wire Panel</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="est-section">
+                    <h3>Fence Specifications</h3>
+                    <div class="est-row">
+                        <label>Fence Height</label>
+                        <select id="est-fence-height">
+                            <option value="36">3'</option>
+                            <option value="42">3'-6"</option>
+                            <option value="48" selected>4'</option>
+                            <option value="60">5'</option>
+                            <option value="72">6'</option>
+                            <option value="96">8'</option>
+                            <option value="120">10'</option>
+                            <option value="144">12'</option>
+                        </select>
+                    </div>
+                    <div class="est-row">
+                        <label>Post Spacing</label>
+                        <select id="est-post-spacing">
+                            <option value="6">6'</option>
+                            <option value="8" selected>8'</option>
+                            <option value="10">10'</option>
+                        </select>
+                    </div>
+
+                    <!-- Chain Link Specs -->
+                    <div id="est-specs-chainlink">
+                        <div class="est-row">
+                            <label>Fabric</label>
+                            <select id="est-fabric">
+                                <option value="9-2">9 Ga. / 2" Mesh</option>
+                                <option value="11-2">11 Ga. / 2" Mesh</option>
+                                <option value="11.5-2.25" selected>11-1/2 Ga. / 2-1/4" Mesh</option>
+                                <option value="6-2">6 Ga. / 2" Mesh</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Finish</label>
+                            <select id="est-finish">
+                                <option value="Galvanized" selected>Galvanized</option>
+                                <option value="Black Vinyl">Black Vinyl Coated</option>
+                                <option value="Green Vinyl">Green Vinyl Coated</option>
+                                <option value="Brown Vinyl">Brown Vinyl Coated</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Selvage</label>
+                            <select id="est-selvage">
+                                <option value="K/K" selected>Knuckle / Knuckle</option>
+                                <option value="K/B">Knuckle / Barb</option>
+                                <option value="B/B">Barb / Barb</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Terminal Post O.D.</label>
+                            <select id="est-term-post">
+                                <option value="2-3/8" selected>2-3/8" SS20</option>
+                                <option value="2-7/8">2-7/8" SS40</option>
+                                <option value="4">4" SCH 40</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Line Post O.D.</label>
+                            <select id="est-line-post">
+                                <option value="1-5/8" selected>1-5/8" SS20</option>
+                                <option value="2-3/8">2-3/8" SS20</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Top Rail O.D.</label>
+                            <select id="est-rail-od">
+                                <option value="1-3/8">1-3/8"</option>
+                                <option value="1-5/8" selected>1-5/8"</option>
+                            </select>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-top-rail" checked> Top Rail</label>
+                            <label><input type="checkbox" id="est-bottom-rail"> Bottom Rail</label>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-braced" checked> Brace &amp; Truss</label>
+                            <label><input type="checkbox" id="est-tension-wire"> Tension Wire</label>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-barb-arms"> Barbed Wire Arms</label>
+                            <label><input type="checkbox" id="est-privacy-slats"> Privacy Slats</label>
+                        </div>
+                    </div>
+
+                    <!-- Wood Fence Specs -->
+                    <div id="est-specs-wood" style="display:none;">
+                        <div class="est-row">
+                            <label>Style</label>
+                            <select id="est-wood-style">
+                                <option value="privacy" selected>Privacy (Board-on-Board)</option>
+                                <option value="stockade">Stockade</option>
+                                <option value="picket">Picket</option>
+                                <option value="shadow-box">Shadow Box / Semi-Privacy</option>
+                                <option value="split-rail">Split Rail</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Post Size</label>
+                            <select id="est-wood-post-size">
+                                <option value="4x4" selected>4x4</option>
+                                <option value="6x6">6x6</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Rail Size</label>
+                            <select id="est-wood-rail-size">
+                                <option value="2x4" selected>2x4</option>
+                                <option value="2x3">2x3</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Picket Size</label>
+                            <select id="est-wood-picket-size">
+                                <option value="1x4">1x4</option>
+                                <option value="1x6" selected>1x6</option>
+                                <option value="dog-ear">Dog Ear 1x6</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Rails Per Section</label>
+                            <select id="est-wood-rails">
+                                <option value="2" selected>2 Rails</option>
+                                <option value="3">3 Rails</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Wood Type</label>
+                            <select id="est-wood-type">
+                                <option value="pressure-treated" selected>Pressure Treated</option>
+                                <option value="cedar">Cedar</option>
+                                <option value="redwood">Redwood</option>
+                                <option value="spruce">Spruce</option>
+                            </select>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-wood-kickboard"> Kickboard / Rot Board</label>
+                            <label><input type="checkbox" id="est-wood-postcaps" checked> Post Caps</label>
+                        </div>
+                    </div>
+
+                    <!-- PVC / Vinyl Specs -->
+                    <div id="est-specs-vinyl" style="display:none;">
+                        <div class="est-row">
+                            <label>Style</label>
+                            <select id="est-vinyl-style">
+                                <option value="privacy" selected>Privacy</option>
+                                <option value="semi-privacy">Semi-Privacy</option>
+                                <option value="picket">Picket</option>
+                                <option value="ranch-rail">Ranch Rail (2, 3, or 4 rail)</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Post Size</label>
+                            <select id="est-vinyl-post-size">
+                                <option value="4x4" selected>4x4</option>
+                                <option value="5x5">5x5</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Color</label>
+                            <select id="est-vinyl-color">
+                                <option value="White" selected>White</option>
+                                <option value="Tan">Tan / Almond</option>
+                                <option value="Gray">Gray</option>
+                                <option value="Adobe">Adobe</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Section Width</label>
+                            <select id="est-vinyl-section">
+                                <option value="6" selected>6'</option>
+                                <option value="8">8'</option>
+                            </select>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-vinyl-postcaps" checked> Post Caps</label>
+                            <label><input type="checkbox" id="est-vinyl-alum-insert" checked> Aluminum Inserts</label>
+                        </div>
+                    </div>
+
+                    <!-- Ornamental Specs -->
+                    <div id="est-specs-ornamental" style="display:none;">
+                        <div class="est-row">
+                            <label>Style</label>
+                            <select id="est-orn-style">
+                                <option value="flat-top" selected>Flat Top</option>
+                                <option value="spear-top">Spear Top / Finial</option>
+                                <option value="puppy-panel">Puppy Picket (4" spacing)</option>
+                                <option value="majestic">Majestic / Staggered</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Material</label>
+                            <select id="est-orn-material">
+                                <option value="aluminum" selected>Aluminum</option>
+                                <option value="steel">Steel / Iron</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Panel Width</label>
+                            <select id="est-orn-panel-width">
+                                <option value="6" selected>6'</option>
+                                <option value="8">8'</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Post Size</label>
+                            <select id="est-orn-post-size">
+                                <option value="2x2" selected>2x2</option>
+                                <option value="2.5x2.5">2-1/2 x 2-1/2</option>
+                                <option value="3x3">3x3</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Post Cap</label>
+                            <select id="est-orn-cap">
+                                <option value="flat" selected>Flat Cap</option>
+                                <option value="ball">Ball Cap</option>
+                                <option value="finial">Finial Cap</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Color</label>
+                            <select id="est-orn-color">
+                                <option value="Black" selected>Black</option>
+                                <option value="Bronze">Bronze</option>
+                                <option value="White">White</option>
+                                <option value="Green">Green</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Wire Panel Specs -->
+                    <div id="est-specs-wirepanel" style="display:none;">
+                        <div class="est-row">
+                            <label>Panel Type</label>
+                            <select id="est-wp-type">
+                                <option value="welded-wire" selected>Welded Wire</option>
+                                <option value="cattle-panel">Cattle Panel</option>
+                                <option value="hog-panel">Hog Panel</option>
+                                <option value="combo">Combo (Wire + Board bottom)</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Post Type</label>
+                            <select id="est-wp-post-type">
+                                <option value="t-post" selected>T-Post (Steel)</option>
+                                <option value="pipe">Pipe Post</option>
+                                <option value="wood">Wood Post (4x4)</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Panel Width</label>
+                            <select id="est-wp-panel-width">
+                                <option value="16" selected>16'</option>
+                                <option value="8">8'</option>
+                                <option value="6">6'</option>
+                            </select>
+                        </div>
+                        <div class="est-row">
+                            <label>Wire Gauge</label>
+                            <select id="est-wp-gauge">
+                                <option value="10" selected>10 Gauge</option>
+                                <option value="12">12 Gauge</option>
+                                <option value="14">14 Gauge</option>
+                            </select>
+                        </div>
+                        <div class="est-row est-checkrow">
+                            <label><input type="checkbox" id="est-wp-top-rail"> Top Rail (Pipe)</label>
+                            <label><input type="checkbox" id="est-wp-tension-wire" checked> Tension Wire</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="est-section">
+                    <h3>Fence Runs</h3>
+                    <p class="est-hint">Add each straight run of fence. Corners = new run.</p>
+                    <div id="est-runs-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn-add-run" onclick="Estimator.addRun()">+ Add Fence Run</button>
+                </div>
+
+                <div class="est-section">
+                    <h3>Gates</h3>
+                    <div id="est-gates-list">
+                        <!-- Populated by JS -->
+                    </div>
+                    <button class="btn-add-run" onclick="Estimator.addGate()">+ Add Gate</button>
+                </div>
+
+                <div class="est-section">
+                    <button class="btn-calculate" onclick="Estimator.calculate()">Calculate Materials</button>
+                    <button class="btn-clear-est" onclick="Estimator.clearAll()">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Right: Results -->
+            <div class="est-results-panel">
+                <div class="est-results-header">
+                    <h3>Material List</h3>
+                    <div class="est-results-actions">
+                        <button class="action-btn" onclick="Estimator.printResults()">Print</button>
+                        <button class="action-btn" onclick="Estimator.exportCSV()">Export CSV</button>
+                    </div>
+                </div>
+                <div id="est-summary" class="est-summary">
+                    <!-- Summary stats -->
+                </div>
+                <div id="est-results">
+                    <p class="placeholder-text">Enter fence runs and click "Calculate Materials" to see results.</p>
+                </div>
+            </div>
+        </div>
+    </div><!-- end page-estimator -->
+
+    <!-- Scripts in dependency order -->
+    <script src="js/drawing.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/tools.js"></script>
+    <script src="js/components.js"></script>
+    <script src="js/shopDrawing.js"></script>
+    <script src="js/fileIO.js"></script>
+    <script src="js/estimator.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

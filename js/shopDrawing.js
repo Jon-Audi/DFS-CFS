@@ -614,182 +614,142 @@ const ShopDrawing = {
     // ===== CANTILEVER GATE =====
 
     drawCantileverGate(opts) {
-        const W = 850, H = 500;
-        const groundY = 330;
-        const fenceH = opts.fenceHeight / 72 * 190;
+        const W = 1100, H = 480;
+        const groundY = 320;
+        const fenceH = opts.fenceHeight / 72 * 175;
+        const gateGap = 12; // ~6" ground clearance
         const topY = groundY - fenceH;
-        const gateGap = 14; // ~6" ground clearance scaled
-        const postTopY = topY - 20;
+        const postTopY = topY - 15;
+        const footingDepth = 55;
 
-        // Cantilever: gate panel is 1.5x opening width (counterbalance)
-        const openingW = Math.min(opts.gateWidth * 2, 340);
-        const cbW = Math.round(openingW * 0.5); // counterbalance = ~half of opening
+        // Layout: opening on left, counterbalance on right
+        const openingW = Math.min(opts.gateWidth * 1.8, 320);
+        const cbW = Math.round(openingW * 0.5);
         const totalGateW = openingW + cbW;
-        const openingLeft = 130;
+
+        // Center the whole drawing horizontally with margins for callouts
+        const margin = 250; // wide margin so left-side callout text fits in viewBox
+        const openingLeft = margin;
         const openingRight = openingLeft + openingW;
         const gateRight = openingLeft + totalGateW;
 
-        // Posts: latch post on left, two roller/support posts on right
+        // Posts
         const latchPostX = openingLeft - 20;
-        const roller1X = openingRight + 30;
-        const roller2X = gateRight + 10;
+        const roller1X = openingRight + 25;
+        const roller2X = gateRight + 15;
 
-        // Below-ground depth for footings
-        const footingTop = groundY;
-        const footingDepth = 65;
+        // Gate frame
+        const frameTop = topY + 5;
+        const frameBot = groundY - gateGap;
+        const frameH = frameBot - frameTop;
+        const frameMidY = (frameTop + frameBot) / 2;
+        const frameLeft = latchPostX + 12;
+        const frameRight = roller2X - 12;
+        const cbDivider = frameLeft + openingW; // opening/counterbalance divider
 
         let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`;
         svg += this.svgDefs();
 
-        // ===== BELOW GROUND: Footings =====
-        // Earth fill below ground line
-        svg += `<rect x="40" y="${groundY}" width="${W - 80}" height="${footingDepth + 20}" fill="#f0ead6" opacity="0.3"/>`;
-        svg += `<rect x="40" y="${groundY}" width="${W - 80}" height="${footingDepth + 20}" fill="url(#ground-fill)" opacity="0.2"/>`;
+        // ===== BELOW GROUND =====
+        svg += `<rect x="60" y="${groundY}" width="${W - 120}" height="${footingDepth + 15}" fill="#f5edd8" opacity="0.4"/>`;
+        svg += `<rect x="60" y="${groundY}" width="${W - 120}" height="${footingDepth + 15}" fill="url(#ground-fill)" opacity="0.15"/>`;
 
-        // Concrete footings (prominent, below ground)
-        const drawBigFooting = (cx, w, d) => {
+        // Concrete footings
+        const drawFooting = (cx, w) => {
             const x = cx - w / 2;
-            svg += `<rect x="${x}" y="${footingTop}" width="${w}" height="${d}" fill="#ccc" stroke="#888" stroke-width="1.5"/>`;
-            // Concrete texture
-            for (let dy = 8; dy < d; dy += 12) {
-                svg += `<line x1="${x + 3}" y1="${footingTop + dy}" x2="${x + w - 3}" y2="${footingTop + dy}" stroke="#bbb" stroke-width="0.5" stroke-dasharray="3,4"/>`;
-            }
+            svg += `<rect x="${x}" y="${groundY}" width="${w}" height="${footingDepth}" fill="#d0d0d0" stroke="#999" stroke-width="1.5"/>`;
+            svg += `<text x="${cx}" y="${groundY + footingDepth / 2 + 4}" text-anchor="middle" font-size="8" fill="#888" font-family="Arial">CONC.</text>`;
         };
-        drawBigFooting(latchPostX, 40, footingDepth);
-        drawBigFooting(roller1X, 48, footingDepth);
-        drawBigFooting(roller2X, 48, footingDepth);
+        drawFooting(latchPostX, 36);
+        drawFooting(roller1X, 42);
+        drawFooting(roller2X, 42);
 
-        // Ground line (bold, drawn on top of footings)
-        svg += `<line x1="40" y1="${groundY}" x2="${W - 40}" y2="${groundY}" stroke="#333" stroke-width="3"/>`;
-        svg += `<text x="${W - 45}" y="${groundY + 5}" text-anchor="start" font-size="11" font-weight="600" fill="#555" font-family="Arial">GRADE</text>`;
+        // Ground line
+        svg += `<line x1="60" y1="${groundY}" x2="${W - 60}" y2="${groundY}" stroke="#222" stroke-width="3"/>`;
+        svg += `<text x="${W - 65}" y="${groundY - 5}" text-anchor="end" font-size="11" font-weight="600" fill="#555" font-family="Arial">Ground Line</text>`;
 
-        // ===== GATE FRAME (floats above ground) =====
-        const frameTop = topY + 5;
-        const frameBot = groundY - gateGap; // 6" above ground
-        const frameH = frameBot - frameTop;
-        const frameLeft = openingLeft - 8;
-        const frameRight = gateRight;
+        // ===== GATE FRAME =====
+        // Bold outer frame
+        svg += `<rect x="${frameLeft}" y="${frameTop}" width="${frameRight - frameLeft}" height="${frameH}" fill="none" stroke="#111" stroke-width="3.5"/>`;
 
-        // Gate frame: bold outer rectangle
-        svg += `<rect x="${frameLeft}" y="${frameTop}" width="${frameRight - frameLeft}" height="${frameH}" fill="none" stroke="#222" stroke-width="3.5"/>`;
+        // Top horizontal rail (bold)
+        svg += `<line x1="${frameLeft}" y1="${frameTop + 4}" x2="${frameRight}" y2="${frameTop + 4}" stroke="#333" stroke-width="2"/>`;
+        // Bottom guide rail
+        svg += `<line x1="${frameLeft}" y1="${frameBot - 4}" x2="${frameRight}" y2="${frameBot - 4}" stroke="#333" stroke-width="2"/>`;
+        // Mid rail
+        svg += `<line x1="${frameLeft}" y1="${frameMidY}" x2="${frameRight}" y2="${frameMidY}" stroke="#444" stroke-width="1.5"/>`;
 
-        // Bottom guide rail (V-track) — the structural member rollers grip
-        svg += `<rect x="${frameLeft}" y="${frameBot - 2}" width="${frameRight - frameLeft}" height="6" fill="#999" stroke="#333" stroke-width="1.5"/>`;
+        // ===== OPENING SECTION =====
+        // Chain link fabric fill
+        svg += `<rect x="${frameLeft + 3}" y="${frameTop + 3}" width="${cbDivider - frameLeft - 6}" height="${frameH - 6}" fill="url(#chainlink-fill)" opacity="0.3"/>`;
 
-        // Horizontal mid rail
-        const frameMidY = (frameTop + frameBot) / 2;
-        svg += `<line x1="${frameLeft}" y1="${frameMidY}" x2="${frameRight}" y2="${frameMidY}" stroke="#333" stroke-width="2"/>`;
+        // X-brace in opening (one large X spanning full opening)
+        svg += `<line x1="${frameLeft}" y1="${frameTop}" x2="${cbDivider}" y2="${frameBot}" stroke="#555" stroke-width="2"/>`;
+        svg += `<line x1="${cbDivider}" y1="${frameTop}" x2="${frameLeft}" y2="${frameBot}" stroke="#555" stroke-width="2"/>`;
 
-        // --- Opening section: vertical uprights + diagonal braces + fabric ---
-        const cbLeft = frameLeft + openingW; // where counterbalance begins
+        // ===== COUNTERBALANCE SECTION =====
+        // Bold vertical divider
+        svg += `<line x1="${cbDivider}" y1="${frameTop}" x2="${cbDivider}" y2="${frameBot}" stroke="#111" stroke-width="3"/>`;
 
-        // Vertical uprights in opening section
-        const uprightCount = Math.max(3, Math.round(openingW / 55));
-        const uprightSpacing = openingW / (uprightCount + 1);
-        for (let i = 1; i <= uprightCount; i++) {
-            const ux = frameLeft + i * uprightSpacing;
-            svg += `<line x1="${ux}" y1="${frameTop}" x2="${ux}" y2="${frameBot}" stroke="#444" stroke-width="1.8"/>`;
-        }
+        // X-braces in counterbalance (bold, no fabric)
+        svg += `<line x1="${cbDivider}" y1="${frameTop}" x2="${frameRight}" y2="${frameBot}" stroke="#333" stroke-width="2.5"/>`;
+        svg += `<line x1="${frameRight}" y1="${frameTop}" x2="${cbDivider}" y2="${frameBot}" stroke="#333" stroke-width="2.5"/>`;
 
-        // Diagonal braces in opening (V-pattern in each bay)
-        // Upper half: diagonals from mid-rail to top corners of each bay
-        for (let i = 0; i <= uprightCount; i++) {
-            const bayLeft = frameLeft + i * uprightSpacing;
-            const bayRight = frameLeft + (i + 1) * uprightSpacing;
-            if (bayRight > cbLeft + 5) break;
-            const bayCX = (bayLeft + bayRight) / 2;
-            // V-brace upper
-            svg += `<line x1="${bayCX}" y1="${frameTop}" x2="${bayLeft}" y2="${frameMidY}" stroke="#666" stroke-width="1.2"/>`;
-            svg += `<line x1="${bayCX}" y1="${frameTop}" x2="${bayRight}" y2="${frameMidY}" stroke="#666" stroke-width="1.2"/>`;
-        }
+        // "Counterbalance" label inside
+        svg += `<text x="${(cbDivider + frameRight) / 2}" y="${frameMidY + 4}" text-anchor="middle" font-size="11" font-weight="700" fill="#666" font-family="Arial">Counter</text>`;
+        svg += `<text x="${(cbDivider + frameRight) / 2}" y="${frameMidY + 16}" text-anchor="middle" font-size="11" font-weight="700" fill="#666" font-family="Arial">Balance</text>`;
 
-        // Chain link fabric fill (opening area)
-        svg += `<rect x="${frameLeft + 4}" y="${frameTop + 4}" width="${openingW - 8}" height="${frameH - 8}" fill="url(#chainlink-fill)" opacity="0.35"/>`;
+        // ===== POSTS =====
+        // Latch post (left, 3" OD)
+        svg += this.drawPostSide(latchPostX, postTopY, groundY + footingDepth - 8, 10);
+        // Roller/support posts (right, 4" OD, heavier)
+        svg += this.drawPostSide(roller1X, postTopY, groundY + footingDepth - 8, 14);
+        svg += this.drawPostSide(roller2X, postTopY, groundY + footingDepth - 8, 14);
 
-        // --- Counterbalance section ---
-        // Bold divider between opening and counterbalance
-        svg += `<line x1="${cbLeft}" y1="${frameTop}" x2="${cbLeft}" y2="${frameBot}" stroke="#222" stroke-width="3"/>`;
-
-        // Counterbalance X-braces (bold structural members)
-        // Full X in upper half
-        svg += `<line x1="${cbLeft}" y1="${frameTop}" x2="${frameRight}" y2="${frameMidY}" stroke="#333" stroke-width="2.5"/>`;
-        svg += `<line x1="${frameRight}" y1="${frameTop}" x2="${cbLeft}" y2="${frameMidY}" stroke="#333" stroke-width="2.5"/>`;
-        // Full X in lower half
-        svg += `<line x1="${cbLeft}" y1="${frameMidY}" x2="${frameRight}" y2="${frameBot}" stroke="#333" stroke-width="2.5"/>`;
-        svg += `<line x1="${frameRight}" y1="${frameMidY}" x2="${cbLeft}" y2="${frameBot}" stroke="#333" stroke-width="2.5"/>`;
-
-        // Counterbalance vertical upright at center
-        const cbCX = (cbLeft + frameRight) / 2;
-        svg += `<line x1="${cbCX}" y1="${frameTop}" x2="${cbCX}" y2="${frameBot}" stroke="#444" stroke-width="1.8"/>`;
-
-        // ===== POSTS (tall, in front of gate) =====
-        // Latch post (left) — shorter O.D., goes into footing
-        svg += this.drawPostSide(latchPostX, postTopY, groundY + footingDepth - 10, 14);
-        // Roller/support posts (right) — heavier, taller
-        svg += this.drawPostSide(roller1X, postTopY - 5, groundY + footingDepth - 10, 18);
-        svg += this.drawPostSide(roller2X, postTopY - 5, groundY + footingDepth - 10, 18);
-
-        // Post caps
-        svg += `<ellipse cx="${latchPostX}" cy="${postTopY - 3}" rx="10" ry="5" fill="#999" stroke="#444" stroke-width="1.5"/>`;
-        svg += `<ellipse cx="${roller1X}" cy="${postTopY - 8}" rx="12" ry="5.5" fill="#999" stroke="#444" stroke-width="1.5"/>`;
-        svg += `<ellipse cx="${roller2X}" cy="${postTopY - 8}" rx="12" ry="5.5" fill="#999" stroke="#444" stroke-width="1.5"/>`;
-
-        // ===== CANTILEVER ROLLERS (between the two support posts) =====
-        // Roller assemblies mounted inside the support posts, gripping the bottom rail
-        [roller1X, roller2X].forEach(px => {
-            const ry = frameBot; // at the bottom rail level
-            // Roller housing/bracket
-            svg += `<rect x="${px - 16}" y="${ry - 14}" width="32" height="20" rx="3" fill="#bbb" stroke="#333" stroke-width="2"/>`;
-            // Upper roller (grips top of bottom rail)
-            svg += `<circle cx="${px - 8}" cy="${ry - 8}" r="5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
-            svg += `<circle cx="${px + 8}" cy="${ry - 8}" r="5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
-            svg += `<circle cx="${px - 8}" cy="${ry - 8}" r="1.5" fill="#555"/>`;
-            svg += `<circle cx="${px + 8}" cy="${ry - 8}" r="1.5" fill="#555"/>`;
-            // Lower roller
-            svg += `<circle cx="${px - 8}" cy="${ry + 2}" r="5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
-            svg += `<circle cx="${px + 8}" cy="${ry + 2}" r="5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
-            svg += `<circle cx="${px - 8}" cy="${ry + 2}" r="1.5" fill="#555"/>`;
-            svg += `<circle cx="${px + 8}" cy="${ry + 2}" r="1.5" fill="#555"/>`;
-
-            // Top guide bracket (keeps gate from swaying)
-            svg += `<rect x="${px - 10}" y="${frameTop - 3}" width="20" height="10" rx="2" fill="#bbb" stroke="#333" stroke-width="1.5"/>`;
+        // Post caps (simple dome)
+        [latchPostX, roller1X, roller2X].forEach(px => {
+            svg += `<ellipse cx="${px}" cy="${postTopY - 2}" rx="9" ry="4" fill="#aaa" stroke="#555" stroke-width="1.5"/>`;
         });
 
-        // Latch/receiver hardware on latch post
-        svg += `<rect x="${latchPostX + 5}" y="${frameTop + 10}" width="14" height="20" rx="3" fill="#bbb" stroke="#333" stroke-width="1.5"/>`;
-        svg += `<rect x="${latchPostX + 5}" y="${frameBot - 30}" width="14" height="20" rx="3" fill="#bbb" stroke="#333" stroke-width="1.5"/>`;
+        // ===== CANTILEVER ROLLER ASSEMBLIES =====
+        [roller1X, roller2X].forEach(px => {
+            // Roller bracket (rectangular, bolted to post)
+            svg += `<rect x="${px - 14}" y="${frameBot - 10}" width="28" height="14" rx="2" fill="#bbb" stroke="#333" stroke-width="2"/>`;
+            // Two rollers gripping guide rail
+            svg += `<circle cx="${px - 6}" cy="${frameBot + 5}" r="5.5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
+            svg += `<circle cx="${px + 6}" cy="${frameBot + 5}" r="5.5" fill="#ddd" stroke="#333" stroke-width="1.5"/>`;
+            svg += `<circle cx="${px - 6}" cy="${frameBot + 5}" r="1.5" fill="#555"/>`;
+            svg += `<circle cx="${px + 6}" cy="${frameBot + 5}" r="1.5" fill="#555"/>`;
+        });
 
-        // ===== GROUND CLEARANCE indicator =====
-        const gcLeft = frameLeft + 30;
-        svg += `<line x1="${gcLeft}" y1="${frameBot}" x2="${gcLeft}" y2="${groundY}" stroke="#c44" stroke-width="1" marker-start="url(#arrowstart)" marker-end="url(#arrowhead)"/>`;
-        svg += `<text x="${gcLeft + 5}" y="${(frameBot + groundY) / 2 + 4}" font-size="10" font-weight="600" fill="#c44" font-family="Arial">~6"</text>`;
-
-        // ===== GATE TRAVEL ARROW =====
-        const arrowY = groundY + footingDepth + 15;
-        svg += `<line x1="${openingLeft}" y1="${arrowY}" x2="${openingLeft + 80}" y2="${arrowY}" stroke="#c44" stroke-width="2.5" marker-end="url(#arrowhead)"/>`;
-        svg += `<text x="${openingLeft + 90}" y="${arrowY + 5}" font-size="13" font-weight="600" fill="#c44" font-family="Arial">GATE TRAVEL</text>`;
+        // ===== GROUND CLEARANCE =====
+        const gcX = frameLeft + 15;
+        svg += `<line x1="${gcX}" y1="${frameBot + 2}" x2="${gcX}" y2="${groundY}" stroke="#c44" stroke-width="1.5" marker-start="url(#arrowstart)" marker-end="url(#arrowhead)"/>`;
+        svg += `<text x="${gcX + 6}" y="${(frameBot + groundY) / 2 + 4}" font-size="11" font-weight="700" fill="#c44" font-family="Arial">~6"</text>`;
 
         // ===== CALLOUTS =====
-        // Left side callouts
-        svg += this.callout(latchPostX - 6, frameMidY, 30, frameMidY - 30, 'Latch Post', 'left');
-        svg += this.callout(latchPostX + 14, frameTop + 18, 30, frameTop - 5, 'Gate Latch', 'left');
-        svg += this.callout(latchPostX - 3, groundY + 30, 30, groundY + 50, 'Concrete Footing', 'left');
+        // Left side — x2=160 gives tx=154, enough room for ~140px of text with text-anchor="end"
+        svg += this.callout(latchPostX, postTopY + 20, 160, postTopY + 5, 'Latch Post (3")', 'left');
+        svg += this.callout(frameLeft + 5, frameMidY, 160, frameMidY + 25, 'Chain Link Fill', 'left');
+        svg += this.callout(latchPostX, groundY + 25, 160, groundY + 40, 'Concrete Footing', 'left');
 
-        // Right side callouts (keep within viewBox)
-        const callR = Math.min(roller2X + 60, W - 120);
-        svg += this.callout(roller1X, frameBot - 5, callR, groundY + 30, 'Cantilever Rollers');
-        svg += this.callout(roller1X + 5, frameTop + 3, callR, frameTop - 25, 'Top Guide');
-        svg += this.callout(roller2X + 10, postTopY + 10, callR, postTopY - 20, 'Roller Post (4")');
+        // Right side
+        const rCallX = roller2X + 25;
+        svg += this.callout(roller2X, postTopY + 20, rCallX, postTopY - 5, 'Roller Posts (4")');
+        svg += this.callout(roller1X + 8, frameBot + 5, rCallX, groundY + 25, 'Cantilever Rollers');
 
         // Top callouts
-        svg += this.callout(frameLeft + openingW / 2, frameTop + 2, frameLeft + openingW / 2, frameTop - 30, 'Gate Frame');
-        svg += this.callout(frameLeft + openingW / 2, frameMidY + 15, frameLeft + openingW / 2 - 80, frameMidY + 45, 'Chain Link Fill', 'left');
-        svg += this.callout(cbCX, frameTop + 15, cbCX, frameTop - 30, 'Counterbalance');
+        const openCX = (frameLeft + cbDivider) / 2;
+        svg += this.callout(openCX, frameTop + 2, openCX, frameTop - 30, 'Opening');
+
+        // Gate travel arrow
+        svg += `<line x1="${openingLeft + 20}" y1="${groundY + footingDepth + 12}" x2="${openingLeft + 100}" y2="${groundY + footingDepth + 12}" stroke="#c44" stroke-width="2.5" marker-end="url(#arrowhead)"/>`;
+        svg += `<text x="${openingLeft + 110}" y="${groundY + footingDepth + 16}" font-size="13" font-weight="700" fill="#c44" font-family="Arial">GATE TRAVEL</text>`;
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(openingLeft, 30, openingRight, 30, this.fmtFt(opts.gateWidth), -18);
-        svg += this.dimLine(openingLeft, 55, gateRight, 55, `${this.fmtFt(Math.round(opts.gateWidth * 1.5))} Total Gate`, -14);
-        svg += this.dimLine(50, topY, 50, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(openingLeft, 25, openingRight, 25, this.fmtFt(opts.gateWidth), -16);
+        svg += this.dimLine(openingLeft, 50, gateRight, 50, `${this.fmtFt(Math.round(opts.gateWidth * 1.5))} Total Gate`, -14);
+        svg += this.dimLine(40, topY, 40, groundY, this.fmtFt(opts.fenceHeight), -18);
 
         svg += '</svg>';
         return svg;

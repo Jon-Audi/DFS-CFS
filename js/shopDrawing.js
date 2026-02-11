@@ -175,11 +175,15 @@ const ShopDrawing = {
     },
 
     callout(x1, y1, x2, y2, text, align = 'right') {
+        // Elbow-style leader: horizontal shelf at y2 then angled line to feature
+        const shelfLen = 15;
+        const bendX = align === 'right' ? x2 - shelfLen : x2 + shelfLen;
         const anchor = align === 'right' ? 'start' : 'end';
-        const tx = align === 'right' ? x2 + 6 : x2 - 6;
+        const tx = align === 'right' ? x2 + 3 : x2 - 3;
+        // Polyline: shelf end → bend → feature, arrowhead at feature
         return `
-            <line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#222" stroke-width="1" marker-end="url(#arrowhead)"/>
-            <text x="${tx}" y="${y2 + 5}" text-anchor="${anchor}" font-size="13" font-weight="600" font-family="Arial, sans-serif" fill="#111">${text}</text>
+            <polyline points="${x2},${y2} ${bendX},${y2} ${x1},${y1}" fill="none" stroke="#333" stroke-width="0.75" marker-end="url(#arrowhead)"/>
+            <text x="${tx}" y="${y2 - 2}" text-anchor="${anchor}" font-size="11" font-weight="500" font-family="Arial, sans-serif" fill="#222">${text}</text>
         `;
     },
 
@@ -268,21 +272,21 @@ const ShopDrawing = {
     // ===== CHAIN LINK FENCE SECTION =====
 
     drawChainlinkFence(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 320;
         const fenceH = opts.fenceHeight / 72 * 200; // scale fence height to drawing
         const topY = groundY - fenceH;
         const postTopY = topY - 15;
         const postBotY = groundY + 35;
-        const leftPostX = 120, rightPostX = 600, linePostX = 360;
+        const leftPostX = 250, rightPostX = 780, linePostX = 515;
         const spacing = rightPostX - leftPostX;
 
         let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`;
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="60" y1="${groundY}" x2="700" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="60" y="${groundY}" width="640" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 32, 45);
@@ -354,55 +358,47 @@ const ShopDrawing = {
         // Fabric selvage illustrations at bottom
         const selvY = H - 50;
         // Twist/barb selvage
-        svg += `<text x="180" y="${selvY - 8}" text-anchor="middle" font-size="9" font-family="Arial" fill="#555">Twist or Barb Selvage</text>`;
+        svg += `<text x="330" y="${selvY - 8}" text-anchor="middle" font-size="9" font-family="Arial" fill="#555">Twist or Barb Selvage</text>`;
         for (let i = 0; i < 5; i++) {
-            svg += `<path d="M${155 + i * 12} ${selvY} L${161 + i * 12} ${selvY + 15} L${167 + i * 12} ${selvY}" fill="none" stroke="#888" stroke-width="1"/>`;
+            svg += `<path d="M${305 + i * 12} ${selvY} L${311 + i * 12} ${selvY + 15} L${317 + i * 12} ${selvY}" fill="none" stroke="#888" stroke-width="1"/>`;
         }
 
         // Knuckle selvage
-        svg += `<text x="500" y="${selvY - 8}" text-anchor="middle" font-size="9" font-family="Arial" fill="#555">Knuckle Selvage</text>`;
+        svg += `<text x="660" y="${selvY - 8}" text-anchor="middle" font-size="9" font-family="Arial" fill="#555">Knuckle Selvage</text>`;
         for (let i = 0; i < 5; i++) {
-            svg += `<path d="M${475 + i * 12} ${selvY} Q${481 + i * 12} ${selvY + 12} ${487 + i * 12} ${selvY}" fill="none" stroke="#888" stroke-width="1"/>`;
+            svg += `<path d="M${635 + i * 12} ${selvY} Q${641 + i * 12} ${selvY + 12} ${647 + i * 12} ${selvY}" fill="none" stroke="#888" stroke-width="1"/>`;
         }
 
         // ===== CALLOUT LABELS =====
-        // Right side callouts
-        svg += this.callout(rightPostX + 8, postTopY - 2, 680, postTopY - 20, 'Post Cap');
-        svg += this.callout(rightPostX + 5, topY + 3, 680, topY - 10, 'Rail End');
-        svg += this.callout(rightPostX + 8, topY + 6, 680, topY + 20, 'Brace Band');
-        svg += this.callout(rightPostX + 8, topY + 45, 680, topY + 50, `Tension Band 15"`, 'right');
-        svg += this.callout(rightPostX + 8, topY + 65, 680, topY + 75, 'On CTR.', 'right');
-        svg += this.callout(rightPostX - 10, topY + fenceH / 2, 680, topY + 105, 'Tension Bar');
-        svg += this.callout(rightPostX - 20, topY + fenceH / 2 + 20, 680, topY + 135, 'Chain Link');
-        svg += this.callout(rightPostX - 20, topY + fenceH / 2 + 30, 680, topY + 155, 'Fabric');
-
-        svg += this.callout(rightPostX + 3, groundY + 15, 680, groundY + 20, 'Corner/End');
-        svg += this.callout(rightPostX + 3, groundY + 15, 680, groundY + 34, 'Post');
+        // Right side callouts — x2=870 gives ~230px for text
+        svg += this.callout(rightPostX + 8, postTopY - 2, 870, postTopY - 25, 'Post Cap');
+        svg += this.callout(rightPostX + 5, topY + 3, 870, topY - 10, 'Rail End');
+        svg += this.callout(rightPostX + 8, topY + 6, 870, topY + 15, 'Brace Band');
+        svg += this.callout(rightPostX + 8, topY + 45, 870, topY + 40, 'Tension Band 15" On CTR.');
+        svg += this.callout(rightPostX - 10, topY + fenceH / 2, 870, topY + 65, 'Tension Bar');
+        svg += this.callout(rightPostX - 20, topY + fenceH / 2 + 20, 870, topY + 90, 'Chain Link Fabric');
+        svg += this.callout(rightPostX + 3, groundY + 15, 870, groundY + 20, 'Corner/End Post');
 
         // Top callouts
-        svg += this.callout(linePostX, postTopY + 6, linePostX + 40, postTopY - 30, 'Line Post');
-        svg += this.callout(linePostX, postTopY + 6, linePostX + 40, postTopY - 44, 'Cap');
+        svg += this.callout(linePostX, postTopY + 6, linePostX + 50, postTopY - 35, 'Line Post Cap');
 
         if (opts.tensionWire) {
-            svg += this.callout(linePostX - 60, topY - 3, linePostX - 60, postTopY - 40, 'Tension Wire', 'left');
+            svg += this.callout(linePostX - 60, topY - 3, 185, postTopY - 40, 'Tension Wire', 'left');
         }
 
-        // Left side callouts
-        svg += this.callout(leftPostX - 3, topY + 3, 70, topY - 10, 'Rail End', 'left');
-
-        // Bottom callouts
-        svg += this.callout(linePostX, groundY - 10, linePostX - 60, groundY + 40, 'Line Post', 'left');
+        // Left side callouts — x2=185 gives ~180px for text
+        svg += this.callout(leftPostX - 3, topY + 3, 185, topY - 10, 'Rail End', 'left');
+        svg += this.callout(linePostX, groundY - 10, 185, groundY + 20, 'Line Post', 'left');
         if (opts.braced) {
-            svg += this.callout(linePostX + 40, groundY - 40, linePostX + 100, groundY + 30, 'Truss Rod');
+            svg += this.callout(linePostX + 40, groundY - 40, 870, groundY + 45, 'Truss Rod');
         }
-        svg += this.callout(leftPostX + 30, groundY - 5, leftPostX + 30, groundY + 50, 'Fabric', 'left');
-        svg += this.callout(leftPostX + 30, groundY - 5, leftPostX + 30, groundY + 62, 'Selvage', 'left');
+        svg += this.callout(leftPostX + 30, groundY - 5, 185, groundY + 40, 'Fabric Selvage', 'left');
 
         // Dimension: post spacing
         svg += this.dimLine(leftPostX, postTopY - 30, rightPostX, postTopY - 30, `${this.fmtFt(Math.round(spacing / (rightPostX - leftPostX) * 120))} Max`, -25);
 
         // Dimension: fence height
-        svg += this.dimLine(leftPostX - 35, topY, leftPostX - 35, groundY, this.fmtFt(opts.fenceHeight), -25);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -25);
 
         svg += '</svg>';
         return svg;
@@ -411,7 +407,7 @@ const ShopDrawing = {
     // ===== SWING GATE =====
 
     drawSwingGate(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 300;
         const fenceH = opts.fenceHeight / 72 * 180;
         const topY = groundY - fenceH;
@@ -428,8 +424,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="40" y1="${groundY}" x2="710" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="40" y="${groundY}" width="670" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 36, 48);
@@ -483,31 +479,24 @@ const ShopDrawing = {
         svg += `<path d="M${frameRight} ${frameBot} A${frameRight - frameLeft} ${frameRight - frameLeft} 0 0 1 ${leftPostX + 8} ${frameBot + (frameRight - frameLeft) * 0.3}" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="6,4"/>`;
 
         // ===== CALLOUTS =====
-        svg += this.callout(leftPostX - 5, postTopY - 2, 55, postTopY - 25, 'Post Cap', 'left');
-        svg += this.callout(leftPostX - 5, midY - 30, 55, midY - 45, 'Gate Post', 'left');
+        // Left side — x2=185 gives ~180px for text with text-anchor="end"
+        svg += this.callout(leftPostX - 5, postTopY - 2, 185, postTopY - 30, 'Post Cap', 'left');
+        svg += this.callout(leftPostX - 5, midY - 30, 185, midY - 50, 'Gate Post', 'left');
+        svg += this.callout(leftPostX + 8, hingePositions[0], 185, hingePositions[0] + 15, 'Hinges', 'left');
+        svg += this.callout(leftPostX, groundY + 10, 185, groundY + 30, 'Concrete Footing', 'left');
 
-        // Hinges callout
-        svg += this.callout(leftPostX + 8, hingePositions[0], 55, hingePositions[0] + 20, 'Hinges', 'left');
-
-        // Latch callout
-        svg += this.callout(rightPostX + 8, latchY + 10, 695, latchY - 10, 'Fork Latch');
-
-        // Frame callouts
-        svg += this.callout(frameRight + 3, frameTop, 695, frameTop - 15, 'Gate Frame');
-        svg += this.callout(frameRight - 20, midY, 695, midY + 5, 'Mid Rail');
-        svg += this.callout(frameRight - 30, midY + 30, 695, midY + 40, 'Chain Link Fabric');
-        svg += this.callout(frameLeft + 8, frameTop + 30, 695, frameTop + 65, 'Tension Bar');
-
-        // Diagonal brace callout
-        svg += this.callout((frameLeft + frameRight) / 2 + 20, (frameTop + midY) / 2, 695, frameTop + 90, 'Diagonal Brace');
-
-        // Post callouts at bottom
-        svg += this.callout(leftPostX, groundY + 10, 55, groundY + 30, 'Gate Post', 'left');
-        svg += this.callout(rightPostX, groundY + 10, 695, groundY + 30, 'Latch Post');
+        // Right side — x2=870 gives ~230px for text with text-anchor="start"
+        svg += this.callout(rightPostX + 8, latchY + 10, 870, latchY - 15, 'Fork Latch');
+        svg += this.callout(frameRight + 3, frameTop, 870, frameTop - 20, 'Gate Frame');
+        svg += this.callout(frameRight - 20, midY, 870, midY, 'Mid Rail');
+        svg += this.callout(frameRight - 30, midY + 30, 870, midY + 25, 'Chain Link Fabric');
+        svg += this.callout(frameLeft + 8, frameTop + 30, 870, frameTop + 50, 'Tension Bar');
+        svg += this.callout((frameLeft + frameRight) / 2 + 20, (frameTop + midY) / 2, 870, frameTop + 75, 'Diagonal Brace');
+        svg += this.callout(rightPostX, groundY + 10, 870, groundY + 30, 'Latch Post');
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(leftPostX, postTopY - 45, rightPostX, postTopY - 45, this.fmtFt(opts.gateWidth), -20);
-        svg += this.dimLine(leftPostX - 45, topY, leftPostX - 45, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, this.fmtFt(opts.gateWidth), -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -516,7 +505,7 @@ const ShopDrawing = {
     // ===== DOUBLE SWING GATE =====
 
     drawDoubleSwingGate(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 300;
         const fenceH = opts.fenceHeight / 72 * 180;
         const topY = groundY - fenceH;
@@ -535,8 +524,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="40" y1="${groundY}" x2="710" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="40" y="${groundY}" width="670" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 36, 48);
@@ -590,22 +579,24 @@ const ShopDrawing = {
         svg += `<path d="M${rFrameL} ${frameBot} A${leafW} ${leafW} 0 0 0 ${rightPostX - 8} ${frameBot + leafW * 0.25}" fill="none" stroke="#999" stroke-width="1" stroke-dasharray="6,4"/>`;
 
         // ===== CALLOUTS =====
-        svg += this.callout(leftPostX - 5, postTopY - 2, 50, postTopY - 25, 'Post Cap', 'left');
-        svg += this.callout(leftPostX - 5, frameMidY, 50, frameMidY - 15, 'Gate Post', 'left');
-        svg += this.callout(leftPostX + 8, frameTop + 15, 50, frameTop + 30, 'Hinges', 'left');
+        // Left side — x2=185
+        svg += this.callout(leftPostX - 5, postTopY - 2, 185, postTopY - 30, 'Post Cap', 'left');
+        svg += this.callout(leftPostX - 5, frameMidY, 185, frameMidY - 20, 'Gate Post', 'left');
+        svg += this.callout(leftPostX + 8, frameTop + 15, 185, frameTop + 25, 'Hinges', 'left');
 
-        svg += this.callout(rightPostX + 5, frameTop + 15, 700, frameTop - 5, 'Hinges');
-        svg += this.callout(rFrameR - 20, frameTop + 3, 700, frameTop + 20, 'Gate Frame');
-        svg += this.callout(rFrameR - 30, frameMidY + 20, 700, frameMidY + 30, 'Chain Link Fabric');
+        // Right side — x2=870
+        svg += this.callout(rightPostX + 5, frameTop + 15, 870, frameTop - 10, 'Hinges');
+        svg += this.callout(rFrameR - 20, frameTop + 3, 870, frameTop + 15, 'Gate Frame');
+        svg += this.callout(rFrameR - 30, frameMidY + 20, 870, frameMidY + 25, 'Chain Link Fabric');
 
-        svg += this.callout(midX + 3, frameMidY, midX + 60, frameMidY + 60, 'Center Latch');
-        svg += this.callout(midX, groundY + 15, midX + 60, groundY + 40, 'Drop Rod / Cane Bolt');
+        svg += this.callout(midX + 3, frameMidY, 870, frameMidY + 50, 'Center Latch');
+        svg += this.callout(midX, groundY + 15, 870, groundY + 30, 'Drop Rod / Cane Bolt');
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(leftPostX, postTopY - 45, rightPostX, postTopY - 45, this.fmtFt(opts.gateWidth), -20);
-        svg += this.dimLine(leftPostX, postTopY - 25, midX, postTopY - 25, this.fmtFt(halfGateW), -15);
-        svg += this.dimLine(midX, postTopY - 25, rightPostX, postTopY - 25, this.fmtFt(halfGateW), -15);
-        svg += this.dimLine(leftPostX - 45, topY, leftPostX - 45, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, this.fmtFt(opts.gateWidth), -20);
+        svg += this.dimLine(leftPostX, postTopY - 30, midX, postTopY - 30, this.fmtFt(halfGateW), -15);
+        svg += this.dimLine(midX, postTopY - 30, rightPostX, postTopY - 30, this.fmtFt(halfGateW), -15);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -728,10 +719,10 @@ const ShopDrawing = {
         svg += `<text x="${gcX + 6}" y="${(frameBot + groundY) / 2 + 4}" font-size="11" font-weight="700" fill="#c44" font-family="Arial">~6"</text>`;
 
         // ===== CALLOUTS =====
-        // Left side — x2=160 gives tx=154, enough room for ~140px of text with text-anchor="end"
-        svg += this.callout(latchPostX, postTopY + 20, 160, postTopY + 5, 'Latch Post (3")', 'left');
-        svg += this.callout(frameLeft + 5, frameMidY, 160, frameMidY + 25, 'Chain Link Fill', 'left');
-        svg += this.callout(latchPostX, groundY + 25, 160, groundY + 40, 'Concrete Footing', 'left');
+        // Left side — x2=185 for consistent callout zone
+        svg += this.callout(latchPostX, postTopY + 20, 185, postTopY + 5, 'Latch Post (3")', 'left');
+        svg += this.callout(frameLeft + 5, frameMidY, 185, frameMidY + 25, 'Chain Link Fill', 'left');
+        svg += this.callout(latchPostX, groundY + 25, 185, groundY + 40, 'Concrete Footing', 'left');
 
         // Right side
         const rCallX = roller2X + 25;
@@ -758,7 +749,7 @@ const ShopDrawing = {
     // ===== ROLLER SLIDE GATE =====
 
     drawSlideGate(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 300;
         const fenceH = opts.fenceHeight / 72 * 180;
         const topY = groundY - fenceH;
@@ -774,8 +765,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="40" y1="${groundY}" x2="710" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="40" y="${groundY}" width="670" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="6" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // V-track on ground
         svg += `<line x1="${leftPostX - 10}" y1="${groundY + 3}" x2="${rightPostX + openingW * 0.6}" y2="${groundY + 3}" stroke="#777" stroke-width="2.5"/>`;
@@ -827,17 +818,20 @@ const ShopDrawing = {
         svg += `<text x="${centerX + 35}" y="${arrowY - 5}" text-anchor="middle" font-size="9" fill="#c44" font-family="Arial">SLIDE OPEN</text>`;
 
         // ===== CALLOUTS =====
-        svg += this.callout(leftPostX - 5, frameMidY, 40, frameMidY - 25, 'Gate Post', 'left');
-        svg += this.callout(leftPostX + 3, frameTop + 3, 40, frameTop - 15, 'Top Guide', 'left');
-        svg += this.callout(rightPostX + 5, frameMidY - 5, 700, frameMidY - 25, 'Latch Post');
-        svg += this.callout(rightPostX + 5, frameMidY + 5, 700, frameMidY + 5, 'Fork Latch');
-        svg += this.callout(wheel1X, frameBot + 8, wheel1X - 30, groundY + 50, 'Roller Wheels', 'left');
+        // Left side — x2=185
+        svg += this.callout(leftPostX - 5, frameMidY, 185, frameMidY - 25, 'Gate Post', 'left');
+        svg += this.callout(leftPostX + 3, frameTop + 3, 185, frameTop - 15, 'Top Guide', 'left');
+        svg += this.callout(wheel1X, frameBot + 8, 185, groundY + 30, 'Roller Wheels', 'left');
+
+        // Right side — x2=870
+        svg += this.callout(rightPostX + 5, frameMidY - 5, 870, frameMidY - 25, 'Latch Post');
+        svg += this.callout(rightPostX + 5, frameMidY + 5, 870, frameMidY + 5, 'Fork Latch');
         svg += this.callout(frameLeft + (frameRight - frameLeft) / 2, frameTop + 3, frameLeft + (frameRight - frameLeft) / 2, frameTop - 20, 'Gate Frame');
-        svg += this.callout(frameLeft + (frameRight - frameLeft) / 2, frameMidY + 20, 700, frameMidY + 35, 'Chain Link Fabric');
+        svg += this.callout(frameLeft + (frameRight - frameLeft) / 2, frameMidY + 20, 870, frameMidY + 35, 'Chain Link Fabric');
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(leftPostX, postTopY - 45, rightPostX, postTopY - 45, this.fmtFt(opts.gateWidth), -20);
-        svg += this.dimLine(leftPostX - 50, topY, leftPostX - 50, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, this.fmtFt(opts.gateWidth), -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -846,13 +840,13 @@ const ShopDrawing = {
     // ===== WOOD FENCE SECTION =====
 
     drawWoodFence(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 320;
         const fenceH = opts.fenceHeight / 72 * 200;
         const topY = groundY - fenceH;
         const postTopY = topY - 8;
         const postBotY = groundY + 40;
-        const leftPostX = 130, rightPostX = 590, linePostX = 360;
+        const leftPostX = 260, rightPostX = 770, linePostX = 515;
         const postW = opts.woodPost === '6x6' ? 14 : 10;
         const railH = 6;
 
@@ -860,8 +854,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="60" y1="${groundY}" x2="700" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="60" y="${groundY}" width="640" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 28, 45);
@@ -967,21 +961,24 @@ const ShopDrawing = {
         }
 
         // ===== CALLOUTS =====
-        svg += this.callout(rightPostX + postW / 2 + 3, postTopY, 690, postTopY - 20, opts.woodPostCaps ? 'Post Cap' : `${opts.woodPost} Post`);
-        svg += this.callout(rightPostX + postW / 2 + 3, railPositions[0], 690, railPositions[0] - 5, `${opts.woodRail} Rail`);
+        // Right side — x2=870
+        svg += this.callout(rightPostX + postW / 2 + 3, postTopY, 870, postTopY - 25, opts.woodPostCaps ? 'Post Cap' : `${opts.woodPost} Post`);
+        svg += this.callout(rightPostX + postW / 2 + 3, railPositions[0], 870, railPositions[0] - 5, `${opts.woodRail} Rail`);
         if (opts.woodStyle !== 'split-rail') {
-            svg += this.callout(rightPostX - 20, topY + fenceH / 2, 690, topY + fenceH / 2 + 20, `${opts.woodPicket} ${opts.woodStyle === 'privacy' ? 'Board' : 'Picket'}`);
+            svg += this.callout(rightPostX - 20, topY + fenceH / 2, 870, topY + fenceH / 2 + 15, `${opts.woodPicket} ${opts.woodStyle === 'privacy' ? 'Board' : 'Picket'}`);
         }
-        svg += this.callout(rightPostX + 3, groundY + 15, 690, groundY + 25, `${opts.woodPost} Post`);
+        svg += this.callout(rightPostX + 3, groundY + 15, 870, groundY + 20, `${opts.woodPost} Post`);
+        svg += this.callout(linePostX, postTopY - 3, linePostX + 50, postTopY - 35, 'Line Post');
+
+        // Left side — x2=185
         if (opts.woodKickboard) {
-            svg += this.callout(leftPostX + 50, groundY - 6, 70, groundY + 40, 'Kickboard', 'left');
+            svg += this.callout(leftPostX + 50, groundY - 6, 185, groundY + 30, 'Kickboard', 'left');
         }
-        svg += this.callout(leftPostX - 5, topY + fenceH / 2, 65, topY + fenceH / 2, `${opts.woodType}`, 'left');
-        svg += this.callout(linePostX, postTopY - 3, linePostX + 50, postTopY - 30, 'Line Post');
+        svg += this.callout(leftPostX - 5, topY + fenceH / 2, 185, topY + fenceH / 2, `${opts.woodType}`, 'left');
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(leftPostX, postTopY - 45, rightPostX, postTopY - 45, `10' Max Post Spacing`, -20);
-        svg += this.dimLine(leftPostX - 40, topY, leftPostX - 40, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, `10' Max Post Spacing`, -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -990,13 +987,13 @@ const ShopDrawing = {
     // ===== VINYL / PVC FENCE SECTION =====
 
     drawVinylFence(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 320;
         const fenceH = opts.fenceHeight / 72 * 200;
         const topY = groundY - fenceH;
         const postTopY = topY - 10;
         const postBotY = groundY + 40;
-        const leftPostX = 140, rightPostX = 580;
+        const leftPostX = 270, rightPostX = 760;
         const postW = opts.vinylPost === '5x5' ? 14 : 12;
         const vinylWall = 2; // vinyl wall thickness visual
 
@@ -1004,8 +1001,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="60" y1="${groundY}" x2="700" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="60" y="${groundY}" width="640" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 30, 45);
@@ -1088,23 +1085,25 @@ const ShopDrawing = {
         }
 
         // ===== CALLOUTS =====
-        svg += this.callout(rightPostX + postW / 2 + 3, postTopY - 5, 690, postTopY - 25, 'Post Cap');
-        svg += this.callout(rightPostX + postW / 2 + 3, topY + 20, 690, topY + 5, `${opts.vinylPost} Vinyl Post`);
+        // Right side — x2=870
+        svg += this.callout(rightPostX + postW / 2 + 3, postTopY - 5, 870, postTopY - 30, 'Post Cap');
+        svg += this.callout(rightPostX + postW / 2 + 3, topY + 20, 870, topY, `${opts.vinylPost} Vinyl Post`);
         if (opts.vinylAlum) {
-            svg += this.callout(rightPostX + 3, topY + fenceH / 3, 690, topY + 40, 'Aluminum Insert');
+            svg += this.callout(rightPostX + 3, topY + fenceH / 3, 870, topY + 25, 'Aluminum Insert');
         }
-        svg += this.callout(rightPostX - 15, railPositions[0], 690, railPositions[0] + 20, 'Vinyl Rail');
-        svg += this.callout(rightPostX - 15, railPositions[0] + 3, 690, railPositions[0] + 35, 'w/ Bracket');
+        svg += this.callout(rightPostX - 15, railPositions[0], 870, railPositions[0] + 15, 'Vinyl Rail w/ Bracket');
         if (opts.vinylStyle !== 'ranch-rail') {
             const panelLabel = opts.vinylStyle === 'picket' ? 'Vinyl Pickets' : 'T&G Panel';
-            svg += this.callout(rightPostX - 40, topY + fenceH / 2, 690, topY + fenceH / 2 + 10, panelLabel);
+            svg += this.callout(rightPostX - 40, topY + fenceH / 2, 870, topY + fenceH / 2 + 10, panelLabel);
         }
-        svg += this.callout(leftPostX - postW / 2 - 3, topY + fenceH / 2, 60, topY + fenceH / 2, `${opts.vinylColor} Vinyl`, 'left');
-        svg += this.callout(rightPostX + 3, groundY + 15, 690, groundY + 30, 'Concrete Footing');
+        svg += this.callout(rightPostX + 3, groundY + 15, 870, groundY + 25, 'Concrete Footing');
+
+        // Left side — x2=185
+        svg += this.callout(leftPostX - postW / 2 - 3, topY + fenceH / 2, 185, topY + fenceH / 2, `${opts.vinylColor} Vinyl`, 'left');
 
         // ===== DIMENSIONS =====
-        svg += this.dimLine(leftPostX, postTopY - 40, rightPostX, postTopY - 40, `${opts.vinylSection}' Section`, -20);
-        svg += this.dimLine(leftPostX - 40, topY, leftPostX - 40, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(leftPostX, postTopY - 45, rightPostX, postTopY - 45, `${opts.vinylSection}' Section`, -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -1113,13 +1112,13 @@ const ShopDrawing = {
     // ===== ORNAMENTAL IRON / ALUMINUM SECTION =====
 
     drawOrnamentalFence(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 320;
         const fenceH = opts.fenceHeight / 72 * 200;
         const topY = groundY - fenceH;
         const postTopY = topY - 10;
         const postBotY = groundY + 35;
-        const leftPostX = 120, rightPostX = 600;
+        const leftPostX = 250, rightPostX = 780;
         const postW = opts.ornPost === '3x3' ? 12 : opts.ornPost === '2.5x2.5' ? 10 : 8;
 
         // Color mapping
@@ -1130,8 +1129,8 @@ const ShopDrawing = {
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="50" y1="${groundY}" x2="710" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="50" y="${groundY}" width="660" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings
         svg += this.drawFooting(leftPostX, groundY, 26, 40);
@@ -1216,21 +1215,23 @@ const ShopDrawing = {
         });
 
         // ===== CALLOUTS =====
+        // Right side — x2=870
         const capLabel = opts.ornCap.charAt(0).toUpperCase() + opts.ornCap.slice(1) + ' Cap';
-        svg += this.callout(rightPostX + postW / 2 + 3, postTopY - 5, 695, postTopY - 30, capLabel);
-        svg += this.callout(rightPostX + postW / 2 + 3, topRailY, 695, topRailY - 10, 'Top Rail');
-        svg += this.callout(rightPostX + postW / 2 + 3, botRailY, 695, botRailY + 5, 'Bottom Rail');
-        svg += this.callout(rightPostX - 20, (topRailY + botRailY) / 2, 695, (topRailY + botRailY) / 2 + 20, `${opts.ornStyle.replace('-', ' ')} Pickets`);
-        svg += this.callout(rightPostX + 3, groundY + 10, 695, groundY + 25, `${opts.ornPost} ${opts.ornMaterial} Post`);
+        svg += this.callout(rightPostX + postW / 2 + 3, postTopY - 5, 870, postTopY - 35, capLabel);
+        svg += this.callout(rightPostX + postW / 2 + 3, topRailY, 870, topRailY - 10, 'Top Rail');
+        svg += this.callout(rightPostX + postW / 2 + 3, botRailY, 870, botRailY + 5, 'Bottom Rail');
+        svg += this.callout(rightPostX - 20, (topRailY + botRailY) / 2, 870, (topRailY + botRailY) / 2 + 15, `${opts.ornStyle.replace('-', ' ')} Pickets`);
+        svg += this.callout(rightPostX + 3, groundY + 10, 870, groundY + 20, `${opts.ornPost} ${opts.ornMaterial} Post`);
 
-        svg += this.callout(leftPostX + postW / 2 + 2, topRailY, 60, topRailY + 20, 'Panel Bracket', 'left');
+        // Left side — x2=185
+        svg += this.callout(leftPostX + postW / 2 + 2, topRailY, 185, topRailY + 15, 'Panel Bracket', 'left');
         if (isPuppy) {
-            svg += this.callout(leftPostX + 40, puppyMidY, 60, puppyMidY + 40, 'Puppy Picket Rail', 'left');
+            svg += this.callout(leftPostX + 40, puppyMidY, 185, puppyMidY + 30, 'Puppy Picket Rail', 'left');
         }
 
         // ===== DIMENSIONS =====
         svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, `6' Panel Width`, -20);
-        svg += this.dimLine(leftPostX - 40, topY, leftPostX - 40, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;
@@ -1239,20 +1240,20 @@ const ShopDrawing = {
     // ===== WELDED WIRE PANEL SECTION =====
 
     drawWirePanelFence(opts) {
-        const W = 750, H = 420;
+        const W = 1100, H = 420;
         const groundY = 320;
         const fenceH = opts.fenceHeight / 72 * 200;
         const topY = groundY - fenceH;
         const postTopY = topY - 8;
         const postBotY = groundY + 35;
-        const leftPostX = 120, rightPostX = 600, linePostX = 360;
+        const leftPostX = 250, rightPostX = 780, linePostX = 515;
 
         let svg = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">`;
         svg += this.svgDefs();
 
         // Ground line
-        svg += `<line x1="50" y1="${groundY}" x2="710" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
-        svg += `<rect x="50" y="${groundY}" width="660" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
+        svg += `<line x1="100" y1="${groundY}" x2="1000" y2="${groundY}" stroke="#666" stroke-width="2"/>`;
+        svg += `<rect x="100" y="${groundY}" width="900" height="8" fill="url(#ground-fill)" opacity="0.3"/>`;
 
         // Footings (T-posts don't get concrete footings visually)
         if (opts.wpPost !== 't-post') {
@@ -1314,26 +1315,27 @@ const ShopDrawing = {
         });
 
         // ===== CALLOUTS =====
+        // Right side — x2=870
         const postLabel = opts.wpPost === 't-post' ? 'Steel T-Post' : opts.wpPost === 'pipe' ? 'Pipe Post (2-3/8")' : '4x4 Wood Post';
-        svg += this.callout(rightPostX + 8, postTopY, 695, postTopY - 20, postLabel);
+        svg += this.callout(rightPostX + 8, postTopY, 870, postTopY - 25, postLabel);
         if (opts.wpPost === 't-post') {
-            svg += this.callout(rightPostX + 5, postTopY - 2, 695, postTopY - 40, 'Safety Cap');
+            svg += this.callout(rightPostX + 5, postTopY - 2, 870, postTopY - 45, 'Safety Cap');
         }
-        svg += this.callout(rightPostX - 15, topY + fenceH / 3, 695, topY + fenceH / 3, `${opts.wpType.replace('-', ' ')} Panel`);
-        svg += this.callout(rightPostX - 15, topY + fenceH / 3, 695, topY + fenceH / 3 + 14, `${opts.wpGauge} Ga.`);
-        svg += this.callout(rightPostX + 10, topY + fenceH / 2, 695, topY + fenceH / 2 + 20, 'Wire Clips');
+        svg += this.callout(rightPostX - 15, topY + fenceH / 3, 870, topY + fenceH / 3, `${opts.wpType.replace('-', ' ')} Panel (${opts.wpGauge} Ga.)`);
+        svg += this.callout(rightPostX + 10, topY + fenceH / 2, 870, topY + fenceH / 2 + 15, 'Wire Clips');
         if (opts.wpTopRail) {
             svg += this.callout(linePostX + 40, topY + 3, linePostX + 40, topY - 25, 'Top Rail (Pipe)');
         }
-        if (opts.wpTension) {
-            svg += this.callout(linePostX - 40, groundY - 5, 60, groundY + 30, 'Tension Wire', 'left');
-        }
+        svg += this.callout(linePostX, postTopY - 3, linePostX + 60, postTopY - 40, 'Line Post');
 
-        svg += this.callout(linePostX, postTopY - 3, linePostX + 60, postTopY - 35, 'Line Post');
+        // Left side — x2=185
+        if (opts.wpTension) {
+            svg += this.callout(linePostX - 40, groundY - 5, 185, groundY + 25, 'Tension Wire', 'left');
+        }
 
         // ===== DIMENSIONS =====
         svg += this.dimLine(leftPostX, postTopY - 50, rightPostX, postTopY - 50, `8' Max Post Spacing`, -20);
-        svg += this.dimLine(leftPostX - 40, topY, leftPostX - 40, groundY, this.fmtFt(opts.fenceHeight), -20);
+        svg += this.dimLine(220, topY, 220, groundY, this.fmtFt(opts.fenceHeight), -20);
 
         svg += '</svg>';
         return svg;

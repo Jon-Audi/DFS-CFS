@@ -7,6 +7,7 @@ const App = {
         Canvas.init();
         Components.init();
         Estimator.init();
+        ShopDrawEditor.init();
         this.bindEvents();
         this.bindKeyboard();
         this.bindToolbar();
@@ -39,6 +40,12 @@ const App = {
         document.addEventListener('keydown', (e) => {
             // Don't capture when typing in inputs
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+                return;
+            }
+
+            // Delegate to editor when on SDE page
+            if (this.currentPage === 'sde') {
+                ShopDrawEditor.onKeyDown(e);
                 return;
             }
 
@@ -381,6 +388,11 @@ const App = {
                 Canvas.resize();
                 Canvas.needsRedraw = true;
             }, 50);
+        }
+
+        // Re-render editor SVG when switching to editor
+        if (page === 'sde') {
+            setTimeout(() => ShopDrawEditor.render(), 50);
         }
     },
 

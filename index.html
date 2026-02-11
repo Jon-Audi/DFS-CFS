@@ -22,6 +22,10 @@
             <svg viewBox="0 0 24 24" width="16" height="16"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zM6 20V4h7v5h5v11H6z" fill="currentColor"/></svg>
             Shop Drawings
         </button>
+        <button class="nav-tab" data-page="sde" onclick="App.showPage('sde')">
+            <svg viewBox="0 0 24 24" width="16" height="16"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 000-1.41l-2.34-2.34a1 1 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
+            Editor
+        </button>
     </div>
 
     <!-- ==================== DRAW PAGE ==================== -->
@@ -886,6 +890,70 @@
         </div>
     </div><!-- end page-estimator -->
 
+    <!-- ==================== SHOP DRAW EDITOR PAGE ==================== -->
+    <div id="page-sde" class="app-page">
+        <div class="sde-layout">
+            <!-- Left: Palette -->
+            <div id="sde-palette">
+                <div class="sde-section">
+                    <h3>Template</h3>
+                    <select id="sde-template">
+                        <option value="blank">Blank</option>
+                        <option value="chainlink" selected>Chain Link Fence</option>
+                        <option value="swing-gate">Swing Gate</option>
+                    </select>
+                    <button class="sde-btn" id="sde-load-template">Load Template</button>
+                </div>
+                <div class="sde-section">
+                    <h3>Parts</h3>
+                    <button class="sde-part-btn" data-part="post" title="Click then click in workspace to place">Post</button>
+                    <button class="sde-part-btn" data-part="rail" title="Click then click two points for rail">Rail</button>
+                    <button class="sde-part-btn" data-part="fabric" title="Click then click two posts to fill">Fabric</button>
+                    <button class="sde-part-btn" data-part="gate" title="Click then click position for gate">Gate</button>
+                    <button class="sde-part-btn" data-part="footing" title="Click then click below a post">Footing</button>
+                    <button class="sde-part-btn" data-part="hardware" title="Click then click position">Hardware</button>
+                </div>
+                <div class="sde-section">
+                    <h3>Annotations</h3>
+                    <button class="sde-part-btn" data-part="callout">Callout</button>
+                    <button class="sde-part-btn" data-part="dimension">Dimension</button>
+                </div>
+                <div class="sde-section">
+                    <button class="sde-btn sde-btn-danger" id="sde-delete-btn">Delete Selected</button>
+                </div>
+            </div>
+
+            <!-- Center: SVG Workspace -->
+            <div id="sde-workspace-wrap">
+                <div id="sde-toolbar">
+                    <button class="action-btn" id="sde-undo" title="Undo (Ctrl+Z)">Undo</button>
+                    <button class="action-btn" id="sde-redo" title="Redo (Ctrl+Y)">Redo</button>
+                    <span class="sde-toolbar-sep"></span>
+                    <button class="action-btn" id="sde-zoom-fit">Fit</button>
+                    <button class="action-btn" id="sde-zoom-reset">100%</button>
+                    <span class="sde-toolbar-sep"></span>
+                    <button class="btn-primary" id="sde-export">Print / Export</button>
+                </div>
+                <div id="sde-workspace">
+                    <svg id="sde-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+                </div>
+                <div id="sde-statusbar">
+                    <span id="sde-status-info">Elements: 0</span>
+                    <span id="sde-status-sel">No selection</span>
+                    <span id="sde-status-tip">Click a template to start</span>
+                </div>
+            </div>
+
+            <!-- Right: Properties -->
+            <div id="sde-properties">
+                <h3>Properties</h3>
+                <div id="sde-props-content">
+                    <p class="placeholder-text">Select an element to edit properties</p>
+                </div>
+            </div>
+        </div>
+    </div><!-- end page-sde -->
+
     <!-- Scripts in dependency order -->
     <script src="js/drawing.js"></script>
     <script src="js/canvas.js"></script>
@@ -894,6 +962,7 @@
     <script src="js/shopDrawing.js"></script>
     <script src="js/fileIO.js"></script>
     <script src="js/estimator.js"></script>
+    <script src="js/shopDrawEditor.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
